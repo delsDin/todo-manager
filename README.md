@@ -4,13 +4,13 @@ Une application de gestion de tâches interactive en ligne de commande écrite e
 
 ## 🎯 Fonctionnalités
 
-- ✅ **Ajouter une tâche** - Créez rapidement de nouvelles tâches
-- 📋 **Lister les tâches** - Affichez toutes vos tâches avec leur statut
-- ✔️ **Marquer comme terminée** - Gérez l'état de vos tâches
-- 🗑️ **Supprimer une tâche** - Supprimez les tâches indésirables
-- 💾 **Sauvegarde automatique** - Vos données sont persistées dans `todo.json`
-- 🎨 **Interface interactive** - Prompt simple et intuitif
-- 📚 **Aide intégrée** - Consultez l'aide directement depuis l'application
+- **Ajouter une tâche** - Créez rapidement de nouvelles tâches
+- **Lister les tâches** - Affichez toutes vos tâches avec leur statut
+- **Marquer comme terminée** - Gérez l'état de vos tâches
+- **Supprimer une tâche** - Supprimez les tâches indésirables
+- **Sauvegarde automatique** - Vos données sont persistées dans `todo.json`
+- **Interface interactive** - Prompt simple et intuitif
+- **Aide intégrée** - Consultez l'aide directement depuis l'application
 
 ## 📋 Prérequis
 
