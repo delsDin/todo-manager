@@ -1,0 +1,54 @@
+# Help - Todo Manager CLI
+
+This provides detailed information about the available commands in the Todo Manager CLI application.
+
+## Main Commands
+
+- add [task name]
+  - Adds a new task to the list.
+  - Example:
+    ```bash
+    add Buy groceries
+    ```
+
+- `list`
+  - Displays all tasks with their ID and status (incomplete/completed).
+  - Example:
+    ```bash
+    list
+    ```
+
+- `done [id]`
+  - Marks the task with the given ID as completed.
+  - Example:
+    ```bash
+    done 2
+    ```
+
+- `delete [id]`
+  - Deletes the task with the given ID.
+  - Example:
+    ```bash
+    delete 1
+    ```
+
+- `quit`
+  - Saves tasks and exits the program.
+
+## User Commands (for future extension)
+
+- `su -a [user_name] -p 'password'` : Add a new user
+- `su -c [user_name] -p 'password'` : Connect to a user
+- `su -d [user_name]` : Delete a user
+
+## Built-in Help
+
+- `help`
+  - Displays this help message in the terminal.
+
+---
+
+Notes:
+- Task IDs are automatically generated integers.
+- Commands must be entered as shown.
+- If there is a syntax error, an error message will be displayed.
