@@ -15,6 +15,7 @@ from typing import Any, Dict
     
 }
 """
+# add task 'Category'
 def get_cmd(todo : dict[str, Any], prompt : str):
     # add category Task
     # list category
@@ -28,76 +29,100 @@ def get_cmd(todo : dict[str, Any], prompt : str):
         prompt_list = prompt.split(" ")
 
         cmd = prompt_list[0]
-        available_prompt = ['add', 'delete', 'list', 'quit', 'help', 'category']
+        available_prompt = ['add', 'delete', 'list', 'quit', 'help', 'category', 'clear', 'done']
         
         if cmd not in available_prompt:
-            print("Erro. Type 'help' to see available help.")
+            print("Error. Type 'help' to see available command.")
             return (None, None, None)
         
         if cmd == 'quit':
             return (cmd, None, None)
         if cmd == 'help' :
             return (cmd, None, None)
-        
-        if not prompt_list[1] :
-            print("command incomplete. Type 'help' to see available help.")
-
-        category = prompt_list[1]
-
-        if category not in todo:
-            print(f"{category} is not in your todo categories")
-            return (None, None, None)
-        
-        if not prompt_list[2] :
-            sec = (None, None, None)
-
-        if cmd == 'add':
-            if sec:
-                print("Error")
-                return (None, None, None)
-            task = prompt_list[2]
-
-            if prompt_list[3:]:
-                for word in prompt_list[3:]:
-                    task = task + " " + word
-
-            return (cmd, category, task)
-        
-        elif cmd == 'delete':
-            if sec :
-                print("Error")
-                return (None, None, None)
-            if prompt_list[3:]:
-                print("Error. Use : delete category Task")
-                return (None, None, None)
-            id = prompt_list[2]
-            return (cmd, category, id)
-        
-        elif cmd == 'list':
-            if not sec :
-                return (cmd, None, None)
-
-            return (cmd, category, None)
-        
-        elif cmd == 'category':
+        if cmd == "clear":
             return (cmd, None, None)
         
-        elif cmd == 'done':
-            if sec :
-                print("Error")
+        # list or list category
+        if cmd == 'list':
+            if not prompt_list[1:]:
+                return (cmd, None, None)
+            else:
+                category = prompt_list[1]
+                if category not in todo.keys():
+                    print(f"{category} is not in your todo categories")
+                    return (None, None, None)
+                
+                if prompt_list[2:]:
+                    print("Invalid command")
+                    return (None, None, None)
+            return (cmd, category, None)
+        
+        # done category id
+        # delete category ID
+        if cmd == 'done' or cmd == 'delete':
+            if not prompt_list[1:]:
+                print("Invalid command. Missing category and ID")
                 return (None, None, None)
-            if prompt_list[3:]:
-                print("Error. Use : delete category Task")
-                return (None, None, None)
-            id = prompt_list[2]
+            else:
+                category = prompt_list[1]
+                if category not in todo.keys():
+                    print(f"{category} is not in your todo categories")
+                    return (None, None, None)
+                
+                if not prompt_list[2:]:
+                    print("Invalid command. Missing ID")
+                    return (None, None, None)
+                else :
+                    id = prompt_list[2]
+                
+                if prompt_list[3:]:
+                    print("Invalid command")
+                    return (None, None, None)
+        
             return (cmd, category, id)
         
-    except Exception:
-        print("Error")
+        # add category Task
+        if cmd == 'add':
+            if not prompt_list[1:]:
+                print("Invalid command. Missing category and Task")
+                return (None, None, None)
+            else :
+                category = prompt_list[1]
+                if category not in todo.keys():
+                    print(f"{category} not in your todo category")
+                    return (None, None, None)
+                if not prompt_list[2:]:
+                    print("Invalid command. Missing Task")
+                    return (None, None, None)
+                else:
+                    task_list = prompt_list[2:]
+
+                    if len(task_list[0]) < 2:
+                        print("Invalid task")
+                        return (None, None, None)
+                    
+                    task = task_list[0]
+                    
+                    if task_list[1:] :
+                        
+                        for word in task_list[1:]:
+                            task = task + " " + word
+                    
+            return (cmd, category, task)
+        
+        if cmd == 'category':
+            return (cmd, None, None)
+        
+    except Exception as e:
+        print(f"Error get_cmd {e}")
         return (None, None, None)
 
-def manage_cmd(todo: dict[str, Any], prompt : str, cond : bool = True):
+def manage_cmd(todo: dict[str, Any], cond : bool = True):
     while cond:
+
+        prompt = prompt_input()
+        if not prompt: continue
+
         try :
             c, x, e = get_cmd(todo, prompt)
 
@@ -110,21 +135,25 @@ def manage_cmd(todo: dict[str, Any], prompt : str, cond : bool = True):
 
             if c == 'quit' :
                 save(todo)
+                clear_screen()
                 break
 
             if c == 'add':
                 if x != None and e != None:
                     category, task = x, e
-                    todo = add(todo, category, task)
+                    added = add(todo, category, task)
+
+                    if not added : continue
+                    todo = added
                 else: continue
                 
             if c == 'list':
                 if not todo:
                     print("Nothing")
-                    return False
+                    continue
                 if x == None :
                     x = 'all'
-                list(todo, x)
+                lists(todo, x)
             
             if c == 'delete':
                 ret = delete(todo, x, e)
@@ -133,15 +162,28 @@ def manage_cmd(todo: dict[str, Any], prompt : str, cond : bool = True):
                 todo = ret
             
             if c == "category":
-                cmd_category(todo, _)
-
-                
-
-                
+                prompt_list = prompt.split(" ")
+                cat = cmd_category(todo, prompt_list)
+                if not cat:
+                    continue
+                todo = cat
             
-        except Exception:
+            if c == 'done':
+                do = done(todo, x,e)
+                if not do : continue
+                todo = do
+            
+            if c == "clear":
+                clear_screen()
+                continue
+
+            
+        except KeyboardInterrupt:
             continue
-    
+        except Exception :
+            continue
+
+
 def help() -> None:
     """
     Print the contents of ``help.txt`` if it exists, otherwise show a fallback message.
@@ -204,7 +246,8 @@ def prompt_input():
         print("\n")
         return False
 
-def cmd_category(todo: dict[str, Any], prompt_list : str):
+
+def cmd_category(todo: dict[str, Any], prompt_list : list[str]):
     # category create name
     try:
         if prompt_list[0] == "category":
@@ -218,8 +261,12 @@ def cmd_category(todo: dict[str, Any], prompt_list : str):
                     print("Action incorrect. Action must be in ['create', 'remove', 'rename']")
                     return False
                 else:
-                    if not prompt_list[2]:
+                    if not prompt_list[2:]:
                         print("Error - commmand not complete. Use : category [create/remove/rename] category_name")
+                        return False
+                    
+                    if prompt_list[2] == "" or prompt_list[2] == " ":
+                        print("Invalid category")
                         return False
                     
                     category = prompt_list[2]
@@ -228,27 +275,33 @@ def cmd_category(todo: dict[str, Any], prompt_list : str):
                         if prompt_list[3:]:
                             print("Category must be one word. Use : category create category_name")
                             return False
-                        create_category(todo, category)
+                        create = create_category(todo, category)
+                        if not create : return False
+                        return create
 
                     elif action == 'remove':
                         if prompt_list[3:]:
                             print("Category must be one word. Use : category removecategory_name")
                             return False
                         
-                        create_category(todo, category)
+                        removed = remove_category(todo, category)
+                        if not removed : return False
+                        return removed
                         
                     elif action == 'rename':
                         if prompt_list[4:]:
                             print("Error. Use : category rename old_name new_name")
                             return False
                         new = prompt_list[3]
-                        rename_category(todo, category, new)
+                        rename = rename_category(todo, category, new)
+                        if not rename : return False
+                        return rename
                         
         else:
             print("Error - command incorrect. Use : category [create/remove/rename] category_name")
             return False
     except:
-        pass
+        return False
 
 def create_category(todo: dict[str, Any], category : str):
     try :
@@ -258,7 +311,7 @@ def create_category(todo: dict[str, Any], category : str):
         else:
             todo[category] = {}
             print(f"Category {category} created.")
-            return True
+            return todo
     except Exception:
         print("Error")
         return False
@@ -272,10 +325,11 @@ def remove_category(todo: dict[str, Any], category: str):
             count_lelment = len(todo[category])
             confirmed = input(f"you have {count_lelment} in this category. Are sure to remove it ? (o/N) : ")
             if confirmed in ["o", "O"]:
-                if todo.pop(category):
+                try : 
+                    todo.pop(category)
                     print(f"Category '{category}' deleted.")
-                    return True
-                else:
+                    return todo
+                except Exception:
                     print(f"Error - category {category} not deleted")
                     return False
             else :
@@ -296,18 +350,25 @@ def rename_category(todo: dict[str, Any], old : str, new : str):
                 return False
             todo[new] = todo[old]
 
-            if todo.pop(old):
+            try:
+                todo.pop(old)
                 print(f"Category {old} renamed to {new}")
-                return True
+                return todo
+            except Exception:
+                print(f"Error - Category duplicated")
+                return False
+            
     except Exception:
         print("Error")
         return False
     
+def list_category():
+    pass
 
 def add(todo : dict[str, Any], category : str, task : str):
 
     position = str(len(todo[category]) + 1)
-    todo[category] = {position : {"name": task, "status": "incomplete"}}
+    todo[category][position] = {"name": task, "status": "incomplete"}
     
     print(f"Task added: \"{task}\" (ID: {position})")
 
@@ -324,21 +385,34 @@ def lists(todo : dict[str, Any], category : str):
         for id, task in todo[category].items():
             print(f"{id}. {task["name"]} [{task["status"]}]")
 
-def done(todo: dict[str, Any], prompt_list: list[str]):
+def done(todo: dict[str, Any], category : str, id : str):
     try : 
-        if prompt_list[2:]:
-            print("Syntax erro. Print only 'done' whith id of task. Eg. : done 1")
-            return False
-        if not int(prompt_list[1]):
-            pass
-        if prompt_list[1] not in todo.keys() :
-            print(f"Task {prompt_list[1]} doesn't exist.")
-            return False
 
-        todo[prompt_list[1]]["status"] = "completed"
-        print(f"Task {prompt_list[1]} completed")
+        if id not in todo[category].keys():
+            print(f"ID {id} isn't in your todo list")
+            return False
+        
+        try:
+            todo[category][id]['status'] = 'completed'
+            print(f"Task {id} completed")
+        except Exception as e:
+            print(f"Error : {e}")
 
         return todo
+
+        # if prompt_list[2:]:
+        #     print("Syntax erro. Print only 'done' whith id of task. Eg. : done 1")
+        #     return False
+        # if not int(prompt_list[1]):
+        #     pass
+        # if prompt_list[1] not in todo.keys() :
+        #     print(f"Task {prompt_list[1]} doesn't exist.")
+        #     return False
+
+        # todo[prompt_list[1]]["status"] = "completed"
+        # print(f"Task {prompt_list[1]} completed")
+
+        # return todo
 
     except Exception:
         print("Second argument must be integer")
@@ -367,54 +441,11 @@ def delete(todo: dict[str, Any], category : str, id : str):
         print("Error")
 
 if __name__ == '__main__':
-    #clear_screen()
-    # todo = {}
-    # task = ["category", "non"]
-    # print(create_category(todo, task))
-    # print(todo)
+    clear_screen()
     todo = load()
 
-    h = False
-    while h :
-        try:
-            prompt = prompt_input()
-            if prompt is False: continue
+    try:
+        manage_cmd(todo = todo)
 
-            prompt_list = prompt.split(" ")
-
-            if prompt_list[0] not in ["add", "list", "done", "delete", "quit", "help"] :
-                print("Error")
-                continue
-            
-            if prompt_list[0] == 'help':
-                help()
-
-            if prompt_list[0] == "quit":
-                save(todo)
-                clear_screen()
-                break
-
-            if prompt_list[0] == "add" :
-                todos = add(todo, prompt_list)
-                if type(todos) == dict:
-                    todo = todos
-                else : continue
-
-            if prompt_list[0] == "list" :
-                if not lists(todo, "work"): continue
-                
-            if prompt_list[0] == "done" :
-
-                todos = done(todo, prompt_list)
-                if type(todos) == dict:
-                    todo = todos
-                else : continue
-
-            if prompt_list[0] == "delete":
-                todos = delete(todo, prompt_list)
-                if type(todos) == dict:
-                    todo = todos
-                else : continue
-        except Exception as e:
-            print(e)
-            break
+    except Exception as e:
+        print(e)
